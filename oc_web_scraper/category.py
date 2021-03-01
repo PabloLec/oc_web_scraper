@@ -22,7 +22,7 @@ class Category:
         self.scrap_category()
 
     def create_book(self, title: str, url: str):
-        book_object = Book(title=title, url=url)
+        book_object = Book(title=title, url=url, category=self.name)
         self.books[title] = book_object
 
     def scrap_category(self):
