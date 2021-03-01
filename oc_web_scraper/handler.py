@@ -21,7 +21,6 @@ class Handler:
 
     def scrap_homepage(self):
         raw_response = requests.get(self.website_url)
-
         soup = BeautifulSoup(raw_response.content, "html.parser")
 
         category_container = soup.find("div", attrs={"class": "side_categories"})
@@ -43,4 +42,4 @@ class Handler:
 
             name = cat.get_text().strip()
 
-            self.library.create_category(name=name, url=url)
+            self.library.create_category(name=name, url=self.website_url + url)
