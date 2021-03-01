@@ -21,8 +21,9 @@ class Category:
 
         self.scrap_category()
 
-    def create_book(self):
-        pass
+    def create_book(self, title: str, url: str):
+        book_object = Book(title=title, url=url)
+        self.books[title] = book_object
 
     def scrap_category(self):
         raw_response = requests.get(self.url)
@@ -60,7 +61,6 @@ class Category:
         for book in books_titles:
             url = book.find("a")["href"]
             absolute_url = url.replace(self.book_relative_path, self.book_absolute_path)
-            title = book.find("a")["title"].strip()
+            book_title = book.find("a")["title"].strip()
 
-            book_object = Book(title=title, url=absolute_url)
-            self.books[title] = book_object
+            self.create_book(title=book_title, url=absolute_url)
