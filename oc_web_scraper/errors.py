@@ -79,7 +79,8 @@ class FailedToGetRating(Exception):
 
 
 class NoProductDescriptionFound(Exception):
-    """Raised when no description is found on given book page"""
+    """Raised when description is found on given book page contained
+    text is not."""
 
     def __init__(self, title: str, url: str):
         super().__init__(

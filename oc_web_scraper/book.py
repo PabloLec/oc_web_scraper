@@ -85,7 +85,7 @@ class Book:
             _CUSTOM_ERRORS.NoImageFound: If book cover is not found in page.
             _CUSTOM_ERRORS.NoRatingFound: If book rating is not found in page.
             _CUSTOM_ERRORS.NoProductDescriptionFound: If book description is
-            not found in page.
+            found in page but proper text is not.
             _CUSTOM_ERRORS.NoProductInformationFound: If book information
             container is not found in page.
         """
@@ -116,15 +116,13 @@ class Book:
             "div", attrs={"id": "product_description"}
         )
 
-        if raw_product_description_title is None:
-            raise _CUSTOM_ERRORS.NoProductDescriptionFound(self.title, url=self.url)
+        # Allow empty description, which occurs.
+        if raw_product_description_title is not None:
+            raw_product_description = raw_product_description_title.find_next("p")
+            if raw_product_description is None:
+                raise _CUSTOM_ERRORS.NoProductDescriptionFound(self.title, url=self.url)
 
-        raw_product_description = raw_product_description_title.find_next("p")
-
-        if raw_product_description is None:
-            raise _CUSTOM_ERRORS.NoProductDescriptionFound(self.title, url=self.url)
-
-        self.product_description = raw_product_description.get_text().strip()
+            self.product_description = raw_product_description.get_text().strip()
 
         raw_product_information = soup.find(
             "table", attrs={"class": "table table-striped"}

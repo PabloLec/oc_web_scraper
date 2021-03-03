@@ -48,6 +48,7 @@ class Category:
         self.number_of_books = 0
 
         self.scrap_category()
+        print(self)
 
     def __str__(self):
         stdout_content = " - Name: {name}\n".format(name=self.name)
@@ -108,7 +109,7 @@ class Category:
                 )
                 self.scrap_category_page(page_url)
 
-    def scrap_category_page(self, url: str):
+    def scrap_category_page(self, page_url: str):
         """Scraps a category page.
         Search for books and calls crate_book to instantiate a Book object.
 
@@ -116,7 +117,7 @@ class Category:
             url (str): Desired page URL
         """
 
-        raw_response = requests.get(self.url)
+        raw_response = requests.get(page_url)
         soup = BeautifulSoup(raw_response.content, "html.parser")
 
         books_titles = soup.find_all("h3")
