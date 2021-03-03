@@ -10,7 +10,7 @@ from oc_web_scraper.book import Book
 class Category:
     """Category class manages category page scraping,
     stores its information and its associated books in
-    a dict. Also, institiate Book objects during scraping.
+    a dict. Also, instantiate Book objects during scraping.
 
     Attributes:
         number_of_books_per_page (int): Number of books per page displayed
@@ -50,7 +50,7 @@ class Category:
         self.scrap_category()
 
     def create_book(self, title: str, url: str):
-        """Instantitate a Book object with previously scrapped infos
+        """Instantiate a Book object with previously scrapped infos
 
         Args:
             title (str): Book title.
