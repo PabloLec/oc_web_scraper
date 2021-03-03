@@ -1,5 +1,5 @@
-import requests
 import re
+import requests
 
 from bs4 import BeautifulSoup, element
 
@@ -28,9 +28,9 @@ class Book:
         """Constructor for Book class.
 
         Args:
-            title (str): Book title
-            url (str): URL of book page
-            category (str): Category of the book
+            title (str): Book title.
+            url (str): Book page URL.
+            category (str): Category of the book.
         """
 
         # Image URL relative part and its absolute equivalent

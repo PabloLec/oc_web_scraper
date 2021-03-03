@@ -1,5 +1,5 @@
-import requests
 import re
+import requests
 
 from bs4 import BeautifulSoup
 
@@ -8,24 +8,68 @@ from oc_web_scraper.book import Book
 
 
 class Category:
-    def __init__(self, name: str, url: str):
+    """Category class manages category page scraping,
+    stores its information and its associated books in
+    a dict. Also, institiate Book objects during scraping.
 
+    Attributes:
+        number_of_books_per_page (int): Number of books per page displayed
+        by the website.
+        book_relative_path (str): Relative path hard-coded in book pages URLs.
+        book_absolute_path (str): Absolute equivalent of the relative path.
+        name (str): Category name. Passed in instantiation arguments.
+        url (str): Category page URL. Passed in instantiation arguments.
+        books (dict): Books scrapped in the category page(s).
+        Format is "book_title" : Book object.
+        number_of_books (int): Number of books associated with the category.
+        Provided by a string in page source.
+    """
+
+    def __init__(self, name: str, url: str):
+        """Constructor for Category class.
+
+        Args:
+            name (str): Category name.
+            url (str): Category page URL.
+        """
+
+        # Number of books per page displayed by the website and book
+        # pages URL relative part and its absolute equivalent
+        # are hard coded to ease eventual adaptation for
+        # future website structure modifications.
         self.number_of_books_per_page = 20
         self.book_relative_path = "../../../"
         self.book_absolute_path = "https://books.toscrape.com/catalogue/"
 
         self.name = name
         self.url = url
+
         self.books = {}
         self.number_of_books = 0
 
         self.scrap_category()
 
     def create_book(self, title: str, url: str):
+        """Instantitate a Book object with previously scrapped infos
+
+        Args:
+            title (str): Book title.
+            url (str): Book page URL.
+        """
+
         book_object = Book(title=title, url=url, category=self.name)
         self.books[title] = book_object
 
     def scrap_category(self):
+        """Scraping process for default category page.
+        Calls scrap_category_page function for proper scraping
+        per page.
+
+        Raises:
+            _CUSTOM_ERRORS.NoResultFoundForCategory: If no books were found for
+            this category.
+        """
+
         raw_response = requests.get(self.url)
         soup = BeautifulSoup(raw_response.content, "html.parser")
 
@@ -53,6 +97,13 @@ class Category:
                 self.scrap_category_page(page_url)
 
     def scrap_category_page(self, url: str):
+        """Scraps a category page.
+        Search for books and calls crate_book to instantiate a Book object.
+
+        Args:
+            url (str): Desired page URL
+        """
+
         raw_response = requests.get(self.url)
         soup = BeautifulSoup(raw_response.content, "html.parser")
 
