@@ -95,7 +95,7 @@ class Category:
 
         results_text = nb_of_results.get_text()
 
-        self.number_of_books = int(re.findall("([0-9]+) results", results_text)[0])
+        self.number_of_books = int(re.findall("([0-9]+) result", results_text)[0])
 
         if self.number_of_books <= self.number_of_books_per_page:
             self.scrap_category_page(self.url)
