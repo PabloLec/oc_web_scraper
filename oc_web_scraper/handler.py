@@ -3,18 +3,21 @@ import requests
 from bs4 import BeautifulSoup
 
 from oc_web_scraper import errors as _CUSTOM_ERRORS
+from oc_web_scraper import saver as _SAVER
+
 from oc_web_scraper.library import Library
 
 
 class Handler:
     def __init__(self, website_url: str):
-
         self.website_url = website_url
         self.library = None
 
         self.create_library()
 
         self.scrap_homepage()
+
+        _SAVER.save_library(self.library, "/tmp/")
 
     def create_library(self):
         self.library = Library()

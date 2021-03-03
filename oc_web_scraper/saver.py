@@ -1,8 +1,15 @@
-from pathlib import Path
+import csv
+
+from pathlib import Path, PurePath
 
 from oc_web_scraper import errors as _CUSTOM_ERRORS
+from oc_web_scraper.library import Library
 
 _SAVE_PATH = "/tmp/"
+
+# Format:
+# data/NomDelaCategory/NomDelaCategory.csv
+# data/NomDelaCategory/Image/TitreDulivre.jpg
 
 
 def save_path_exists(save_path: str):
@@ -18,5 +25,8 @@ def save_path_exists(save_path: str):
 # If so create a .csv.backup file
 
 
-def save_library(library):
-    pass
+def save_library(library: Library, save_path: str):
+    path_object = Path(save_path)
+
+    for category in library.categories:
+        print(category)

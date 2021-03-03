@@ -37,25 +37,33 @@ class NoResultFoundForCategory(Exception):
 class BookInfoParsingFailed(Exception):
     """Raised when some info were not found within book info container"""
 
-    def __init__(self, title: str):
-        super().__init__("Failed to parse infos for book: {title}.".format(title=title))
+    def __init__(self, title: str, url: str):
+        super().__init__(
+            "Failed to parse infos for book: {title}.\nURL: {url}".format(
+                title=title, url=url
+            )
+        )
 
 
 class NoImageFound(Exception):
     """Raised when no image is found on given book page"""
 
-    def __init__(self, title: str):
+    def __init__(self, title: str, url: str):
         super().__init__(
-            "No product image found for book: {title}.".format(title=title)
+            "No product image found for book: {title}.\nURL: {url}".format(
+                title=title, url=url
+            )
         )
 
 
 class NoRatingFound(Exception):
     """Raised when no rating is found on given book page"""
 
-    def __init__(self, title: str):
+    def __init__(self, title: str, url: str):
         super().__init__(
-            "No product rating found for book: {title}.".format(title=title)
+            "No product rating found for book: {title}.\nURL: {url}".format(
+                title=title, url=url
+            )
         )
 
 
@@ -73,25 +81,31 @@ class FailedToGetRating(Exception):
 class NoProductDescriptionFound(Exception):
     """Raised when no description is found on given book page"""
 
-    def __init__(self, title: str):
+    def __init__(self, title: str, url: str):
         super().__init__(
-            "No product description found for book: {title}.".format(title=title)
+            "No product description found for book: {title}.\nURL: {url}".format(
+                title=title, url=url
+            )
         )
 
 
 class NoProductInformationFound(Exception):
     """Raised when no information is found on given book page"""
 
-    def __init__(self, title: str):
+    def __init__(self, title: str, url: str):
         super().__init__(
-            "No product information found for book: {title}.".format(title=title)
+            "No product information found for book: {title}.\nURL: {url}".format(
+                title=title, url=url
+            )
         )
 
 
 class CouldNotParseInfo(Exception):
     """Raised when no information is found on given book page"""
 
-    def __init__(self, title: str, info: str):
+    def __init__(self, title: str, info: str, url: str):
         super().__init__(
-            "Could not parse {info} for title: {title}.".format(info=info, title=title)
+            "Could not parse {info} for title: {title}.\nURL: {url}".format(
+                info=info, title=title, url=url
+            )
         )

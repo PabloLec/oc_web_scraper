@@ -96,7 +96,7 @@ class Book:
         raw_image = soup.find("img", attrs={"alt": self.title})
 
         if raw_image is None:
-            raise _CUSTOM_ERRORS.NoImageFound(self.title)
+            raise _CUSTOM_ERRORS.NoImageFound(self.title, url=self.url)
 
         image_relative_url = raw_image["src"]
         image_absolute_url = image_relative_url.replace(
@@ -108,7 +108,7 @@ class Book:
         raw_rating = soup.select('p[class*="star-rating"]')
 
         if len(raw_rating) == 0:
-            raise _CUSTOM_ERRORS.NoRatingFound(self.title)
+            raise _CUSTOM_ERRORS.NoRatingFound(self.title, url=self.url)
 
         self.set_rating(raw_rating=raw_rating[0])
 
@@ -117,12 +117,12 @@ class Book:
         )
 
         if raw_product_description_title is None:
-            raise _CUSTOM_ERRORS.NoProductDescriptionFound(self.title)
+            raise _CUSTOM_ERRORS.NoProductDescriptionFound(self.title, url=self.url)
 
         raw_product_description = raw_product_description_title.find_next("p")
 
         if raw_product_description is None:
-            raise _CUSTOM_ERRORS.NoProductDescriptionFound(self.title)
+            raise _CUSTOM_ERRORS.NoProductDescriptionFound(self.title, url=self.url)
 
         self.product_description = raw_product_description.get_text().strip()
 
@@ -131,7 +131,7 @@ class Book:
         )
 
         if raw_product_information is None:
-            raise _CUSTOM_ERRORS.NoProductInformationFound(self.title)
+            raise _CUSTOM_ERRORS.NoProductInformationFound(self.title, url=self.url)
 
         self.parse_product_info(raw_product_information)
 
@@ -199,7 +199,7 @@ class Book:
         ]
 
         if any(mandatory_attr_not_set):
-            raise _CUSTOM_ERRORS.BookInfoParsingFailed(title=self.title)
+            raise _CUSTOM_ERRORS.BookInfoParsingFailed(title=self.title, url=self.url)
 
     def set_upc(self, raw_line: element.Tag):
         """Sets upc class attribute from raw DOM element.
@@ -215,7 +215,9 @@ class Book:
         value = raw_line.find("td")
 
         if value is None:
-            raise _CUSTOM_ERRORS.CouldNotParseInfo(title=self.title, info="UPC")
+            raise _CUSTOM_ERRORS.CouldNotParseInfo(
+                title=self.title, info="UPC", url=self.url
+            )
 
         self.upc = value.get_text().strip()
 
@@ -234,7 +236,7 @@ class Book:
 
         if value is None:
             raise _CUSTOM_ERRORS.CouldNotParseInfo(
-                title=self.title, info="Price including Tax"
+                title=self.title, info="Price including Tax", url=self.url
             )
 
         self.price_including_tax = value.get_text().strip()
@@ -254,7 +256,7 @@ class Book:
 
         if value is None:
             raise _CUSTOM_ERRORS.CouldNotParseInfo(
-                title=self.title, info="Price excluding Tax"
+                title=self.title, info="Price excluding Tax", url=self.url
             )
 
         self.price_excluding_tax = value.get_text().strip()
@@ -274,14 +276,14 @@ class Book:
 
         if value is None:
             raise _CUSTOM_ERRORS.CouldNotParseInfo(
-                title=self.title, info="Number available"
+                title=self.title, info="Number available", url=self.url
             )
 
         number = re.findall("([0-9]+) available", value.get_text())
 
         if len(number) == 0:
             raise _CUSTOM_ERRORS.CouldNotParseInfo(
-                title=self.title, info="Number available"
+                title=self.title, info="Number available", url=self.url
             )
 
         self.number_available = int(number[0])

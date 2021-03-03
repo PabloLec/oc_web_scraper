@@ -53,7 +53,7 @@ class Category:
         stdout_content = " - Name: {name}\n".format(name=self.name)
         stdout_content += "  - URL: {url}\n\n".format(url=self.url)
         stdout_content += "  - Number of books (provided by website): {num}\n".format(
-            num=len(self.number_of_books)
+            num=self.number_of_books
         )
         stdout_content += "  - Number of books (scrapped): {num}\n".format(
             num=len(self.books)
