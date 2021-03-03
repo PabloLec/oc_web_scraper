@@ -54,27 +54,27 @@ class Book:
         self.scrap_book()
 
     def __str__(self):
-        print_content = " - Title: {title}\n".format(title=self.title)
-        print_content += "  - URL: {url}\n\n".format(url=self.url)
-        print_content += "  - Description: {description}\n\n".format(
+        stdout_content = " - Title: {title}\n".format(title=self.title)
+        stdout_content += "  - URL: {url}\n\n".format(url=self.url)
+        stdout_content += "  - Description: {description}\n\n".format(
             description=self.product_description
         )
-        print_content += "  - UPC: {upc}\n".format(upc=self.upc)
-        print_content += "  - Price Including Tax: {price}\n".format(
+        stdout_content += "  - UPC: {upc}\n".format(upc=self.upc)
+        stdout_content += "  - Price Including Tax: {price}\n".format(
             price=self.price_including_tax
         )
-        print_content += "  - Price Excluding Tax: {price}\n".format(
+        stdout_content += "  - Price Excluding Tax: {price}\n".format(
             price=self.price_excluding_tax
         )
-        print_content += "  - Number Available: {number}\n".format(
+        stdout_content += "  - Number Available: {number}\n".format(
             number=self.number_available
         )
-        print_content += "  - Review rating: {rating}\n".format(
+        stdout_content += "  - Review rating: {rating}\n".format(
             rating=self.review_rating
         )
-        print_content += "  - Image URL: {url}\n".format(url=self.image_url)
+        stdout_content += "  - Image URL: {url}\n".format(url=self.image_url)
 
-        return print_content
+        return stdout_content
 
     def scrap_book(self):
         """Scraping process for book pages.

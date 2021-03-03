@@ -49,6 +49,18 @@ class Category:
 
         self.scrap_category()
 
+    def __str__(self):
+        stdout_content = " - Name: {name}\n".format(name=self.name)
+        stdout_content += "  - URL: {url}\n\n".format(url=self.url)
+        stdout_content += "  - Number of books (provided by website): {num}\n".format(
+            num=len(self.number_of_books)
+        )
+        stdout_content += "  - Number of books (scrapped): {num}\n".format(
+            num=len(self.books)
+        )
+
+        return stdout_content
+
     def create_book(self, title: str, url: str):
         """Instantiate a Book object with previously scrapped infos
 

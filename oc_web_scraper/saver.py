@@ -11,8 +11,10 @@ def save_path_exists(save_path: str):
     if not path_object.exists():
         raise _CUSTOM_ERRORS.SavePathDoesNotExists(save_path)
 
+    return True
 
-# Add a function to check whether csv file already exists.
+
+# Add a function to check whether csv file already exists or not.
 # If so create a .csv.backup file
 
 
