@@ -1,3 +1,14 @@
+class SavePathDoesNotExists(Exception):
+    """Raised when path provied in config for saving does not exists"""
+
+    def __init__(self, path):
+        super().__init__(
+            "Save path does not exists. Check your config file.\nCurrent path: {path}".format(
+                path=path
+            )
+        )
+
+
 class NoCategoryContainerFound(Exception):
     """Raised when category container is not found during scraping"""
 
