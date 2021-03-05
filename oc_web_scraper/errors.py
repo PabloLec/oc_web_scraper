@@ -1,3 +1,14 @@
+class CouldNotGetMainPage(Exception):
+    """Raised when path provided in config for saving does not exists."""
+
+    def __init__(self, url):
+        super().__init__(
+            "Could not get the main page. Check your website URL.\nURL: {url}".format(
+                url=url
+            )
+        )
+
+
 class SavePathDoesNotExists(Exception):
     """Raised when path provided in config for saving does not exists."""
 

@@ -8,9 +8,31 @@ from oc_web_scraper import errors as _CUSTOM_ERRORS
 
 
 class Logger:
+    """Logger class manges logging process depending on config.yml file params.
+    If enabled, will log to a file or to terminal with 'logging' library.
+
+    Attributes:
+        logger (logging.Logger): Proper 'logging' logger object if enabled.
+        log_to_file (bool): If True, will not output anything in terminal
+        and redirect stdout to selected file.
+        log_path (str): Local path for log file.
+        log_level (str): Log level desired by user. Should match a level
+        of 'library' log level.
+    """
+
     def __init__(
         self, enable_logging: bool, log_to_file: bool, log_path: str, log_level: str
     ):
+        """Constructor for Logger class.
+
+        Args:
+            enable_logging (bool): If True, will enable logging throughout script.
+            log_to_file (bool): If True, will not output anything in terminal
+            log_path (str): Local path for log file.
+            log_level (str): Log level desired by user. Should match a level
+            of 'library' log level.
+        """
+
         self.enable_logging = enable_logging
 
         if not self.enable_logging:
@@ -31,6 +53,16 @@ class Logger:
             self.start_logging_to_terminal()
 
     def set_log_level(self, log_level: str):
+        """Takes string given in config.yml file and set log level
+        to corresponding 'logging' library level.
+
+        Args:
+            log_level (str): Log level given in config.yml.
+        Raises:
+            _CUSTOM_ERRORS.CouldNotParseLogLevel: If log level given in
+            config.yml does not match any 'logging' library level.
+        """
+
         if log_level == "debug":
             self.log_level = logging.DEBUG
         elif log_level == "info":
@@ -45,7 +77,7 @@ class Logger:
             raise _CUSTOM_ERRORS.CouldNotParseLogLevel(level=log_level)
 
     def start_logging_to_file(self):
-        """Main logging function, initiates and configures the logger object."""
+        """If set so in config.yml, initiates logging to a file."""
 
         time = datetime.now().strftime("%Y-%m-%d-%H%M%S")
 
@@ -59,25 +91,34 @@ class Logger:
         self.logger.addHandler(file_handler)
 
     def start_logging_to_terminal(self):
+        """If set so in config.yml, initiates logging to terminal."""
 
         stream_handler = logging.StreamHandler()
         stream_handler.setLevel(self.log_level)
 
         self.logger.addHandler(stream_handler)
 
-    def write(self, log_type: str, text: str):
-        """Uses logger object to write to file."""
+    def write(self, log_level: str, text: str):
+        """Writes given message to either a file or terminal.
+        Handles exiting if logging is disabled.
+        Logger object of 'logging' library handles not writing
+        anything if message level is lower than set log level.
+
+        Args:
+            log_level (str): Message log level.
+            text (str): Message text to print.
+        """
 
         if not self.enable_logging:
             return
 
-        if log_type == "debug":
+        if log_level == "debug":
             self.logger.debug(text)
-        elif log_type == "info":
+        elif log_level == "info":
             self.logger.info(text)
-        elif log_type == "warning":
+        elif log_level == "warning":
             self.logger.warning(text)
-        elif log_type == "error":
+        elif log_level == "error":
             self.logger.error(text)
-        elif log_type == "critical":
+        elif log_level == "critical":
             self.logger.critical(text)

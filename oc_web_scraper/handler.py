@@ -24,8 +24,6 @@ class Handler:
             log_level=self.config["log_level"],
         )
 
-        self.logger.write("debug", "coucou")
-
         self.website_url = website_url
         self.library = Library()
 
@@ -42,6 +40,10 @@ class Handler:
 
     def scrap_homepage(self):
         raw_response = requests.get(self.website_url)
+
+        if raw_response.status_code != 200:
+            raise _CUSTOM_ERRORS.CouldNotGetMainPage(url=self.website_url)
+
         soup = BeautifulSoup(raw_response.content, "html.parser")
 
         category_container = soup.find("div", attrs={"class": "side_categories"})
