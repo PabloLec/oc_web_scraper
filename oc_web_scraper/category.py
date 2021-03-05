@@ -48,7 +48,6 @@ class Category:
         self.number_of_books = 0
 
         self.scrap_category()
-        print(self)
 
     def __str__(self):
         stdout_content = " - Name: {name}\n".format(name=self.name)
