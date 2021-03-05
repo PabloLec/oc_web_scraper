@@ -15,7 +15,6 @@ class Handler:
         self.website_url = website_url
         self.library = Library()
         self.saver = Saver()
-        self.config = None
 
         self.scrap_homepage()
 
