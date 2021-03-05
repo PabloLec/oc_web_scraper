@@ -8,7 +8,7 @@ from oc_web_scraper import errors as _CUSTOM_ERRORS
 
 
 class Logger:
-    """Logger class manges logging process depending on config.yml file params.
+    """Logger class manages logging process depending on config.yml file params.
     If enabled, will log to a file or to terminal with 'logging' library.
 
     Attributes:
@@ -100,9 +100,9 @@ class Logger:
 
     def write(self, log_level: str, text: str):
         """Writes given message to either a file or terminal.
-        Handles exiting if logging is disabled.
+        Handles returning if logging is disabled.
         Logger object of 'logging' library handles not writing
-        anything if message level is lower than set log level.
+        anything if message level is lower than global set log level.
 
         Args:
             log_level (str): Message log level.
