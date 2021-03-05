@@ -7,18 +7,38 @@ from bs4 import BeautifulSoup
 from oc_web_scraper import errors as _CUSTOM_ERRORS
 
 from oc_web_scraper.saver import Saver
+from oc_web_scraper.logger import Logger
 from oc_web_scraper.library import Library
 
 
 class Handler:
     def __init__(self, website_url: str):
+        self.config = None
+        self.parse_config()
+
+        self.saver = Saver(save_path=self.config["save_path"])
+        self.logger = Logger(
+            enable_logging=self.config["enable_logging"],
+            log_to_file=self.config["log_to_file"],
+            log_path=self.config["log_path"],
+            log_level=self.config["log_level"],
+        )
+
+        self.logger.write("debug", "coucou")
+
         self.website_url = website_url
         self.library = Library()
-        self.saver = Saver()
 
         self.scrap_homepage()
 
         self.saver.save_library(self.library)
+
+    def parse_config(self):
+        package_dir = Path(__file__).parent
+        config_path = package_dir.joinpath("config.yml").resolve()
+
+        with open(str(config_path)) as config_file:
+            self.config = yaml.load(config_file, Loader=yaml.FullLoader)
 
     def scrap_homepage(self):
         raw_response = requests.get(self.website_url)

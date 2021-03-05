@@ -20,7 +20,7 @@ class Category:
         name (str): Category name. Passed in instantiation arguments.
         url (str): Category page URL. Passed in instantiation arguments.
         books (dict): Books scrapped in the category page(s).
-        Format is "book_title" : Book object.
+        Format is "book_title": Book object.
         number_of_books (int): Number of books associated with the category.
         Provided by a string in page source.
     """

@@ -17,24 +17,18 @@ class Saver:
     cover image for each book.
 
     Attributes:
-        config (dict): Parsed content of config.yml file.
+        save_path (str): Parsed from config.yml file. Set
+        by Handler.
     """
 
-    def __init__(self):
-        """Constructor for Saver class."""
+    def __init__(self, save_path: str):
+        """Constructor for Saver class.
 
-        config = None
+        Args:
+            save_path (str): Local save path.
+        """
 
-        self.parse_config()
-
-    def parse_config(self):
-
-        package_dir = Path(__file__).parent
-        config_path = package_dir.joinpath("config.yml").resolve()
-
-        with open(str(config_path)) as config_file:
-            self.config = yaml.load(config_file, Loader=yaml.FullLoader)
-
+        self.save_path = save_path
         self.save_path_exists()
 
     def save_path_exists(self):
@@ -47,10 +41,11 @@ class Saver:
         Returns:
             bool: Path exists.
         """
-        path_object = Path(self.config["save_path"])
+
+        path_object = Path(self.save_path)
 
         if not path_object.exists():
-            raise _CUSTOM_ERRORS.SavePathDoesNotExists(self.config["save_path"])
+            raise _CUSTOM_ERRORS.SavePathDoesNotExists(self.save_path)
 
         return True
 
@@ -162,7 +157,7 @@ class Saver:
 
         category_slug = self.slugify(category_name)
 
-        category_path = Path(self.config["save_path"]).joinpath(category_slug)
+        category_path = Path(self.save_path).joinpath(category_slug)
 
         return category_path
 
