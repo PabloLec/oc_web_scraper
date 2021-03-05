@@ -5,37 +5,21 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 from oc_web_scraper import errors as _CUSTOM_ERRORS
-from oc_web_scraper import saver as _SAVER
 
+from oc_web_scraper.saver import Saver
 from oc_web_scraper.library import Library
 
 
 class Handler:
     def __init__(self, website_url: str):
         self.website_url = website_url
-        self.library = None
+        self.library = Library()
+        self.saver = Saver()
         self.config = None
-
-        self.parse_config()
-
-        self.create_library()
 
         self.scrap_homepage()
 
-        _SAVER.save_library(self.library, self.config["save_path"])
-
-    def create_library(self):
-        self.library = Library()
-
-    def parse_config(self):
-
-        package_dir = Path(__file__).parent
-        config_path = package_dir.joinpath("config.yml").resolve()
-
-        with open(str(config_path)) as config_file:
-            self.config = yaml.load(config_file, Loader=yaml.FullLoader)
-
-        _SAVER.save_path_exists(self.config["save_path"])
+        self.saver.save_library(self.library)
 
     def scrap_homepage(self):
         raw_response = requests.get(self.website_url)

@@ -1,4 +1,6 @@
 import csv
+import requests
+import yaml
 
 from pathlib import Path, PurePath
 from string import ascii_letters, punctuation
@@ -8,122 +10,146 @@ from oc_web_scraper.library import Library
 from oc_web_scraper.category import Category
 from oc_web_scraper.book import Book
 
-_SAVE_PATH = "/tmp/"
 
-# Format:
-# data/NomDelaCategory/NomDelaCategory.csv
-# data/NomDelaCategory/Image/TitreDulivre.jpg
+class Saver:
+    def __init__(self):
+        config = None
 
+        self.parse_config()
 
-def slugify(raw_string: str):
-    slug = ""
+    def parse_config(self):
 
-    raw_string = raw_string.strip()
+        package_dir = Path(__file__).parent
+        config_path = package_dir.joinpath("config.yml").resolve()
 
-    for char in raw_string:
-        if char in ascii_letters:
-            slug += char.lower()
-        elif char == " ":
-            slug += "_"
+        with open(str(config_path)) as config_file:
+            self.config = yaml.load(config_file, Loader=yaml.FullLoader)
 
-    return slug
+        self.save_path_exists()
 
+    def slugify(self, raw_string: str):
+        slug = ""
 
-def save_path_exists(save_path: str):
-    path_object = Path(save_path)
+        for char in raw_string:
+            if char in ascii_letters:
+                slug += char.lower()
+            elif char == " ":
+                slug += "_"
 
-    if not path_object.exists():
-        raise _CUSTOM_ERRORS.SavePathDoesNotExists(save_path)
+        return slug.strip("_")
 
-    return True
+    def save_path_exists(self):
+        path_object = Path(self.config["save_path"])
 
+        if not path_object.exists():
+            raise _CUSTOM_ERRORS.SavePathDoesNotExists(self.config["save_path"])
 
-def backup_csv_file(csv_file: Path):
-    pass
+        return True
 
+    def backup_csv_file(self, csv_file: Path):
+        backup_file = Path(csv_file.parent / (csv_file.name + ".backup"))
 
-def get_category_path(save_path: str, category_name: str):
-    category_slug = slugify(category_name)
+        if backup_file.exists():
+            backup_file.unlink()
 
-    category_path = Path(save_path).joinpath(category_slug)
+        csv_file.rename(backup_file)
 
-    return category_path
+    def get_category_path(self, category_name: str):
+        category_slug = self.slugify(category_name)
 
+        category_path = Path(self.config["save_path"]).joinpath(category_slug)
 
-def create_category_dir(path: Path):
+        return category_path
 
-    image_path = path.joinpath("images")
+    def create_category_dir(self, path: Path):
 
-    Path(path).mkdir(exist_ok=True)
-    Path(image_path).mkdir(exist_ok=True)
+        image_path = path.joinpath("images")
 
+        Path(path).mkdir(exist_ok=True)
+        Path(image_path).mkdir(exist_ok=True)
 
-def save_csv(category_name: str, csv_rows: dict, category_path: Path):
-    csv_fieldnames = [
-        "URL",
-        "UPC",
-        "Title",
-        "Price Including Tax",
-        "Price Excluding Tax",
-        "Number Available",
-        "Product Description",
-        "Category",
-        "Review Rating",
-        "Image URL",
-    ]
+    def save_image(self, book_title: str, image_url: str, category_path: Path):
+        img_response = requests.get(image_url, stream=True, allow_redirects=True)
 
-    category_slug = slugify(category_name)
-    csv_file_path = category_path.joinpath("{slug}.csv".format(slug=category_slug))
+        if img_response.status_code != 200:
+            raise _CUSTOM_ERRORS.FailedToSaveImage(title=book_title, url=image_url)
 
-    if csv_file_path.exists():
-        backup_csv_file(csv_file=csv_file_path)
+        image_dir = category_path.joinpath("images")
+        book_slug = self.slugify(book_title)
+        image_file = image_dir.joinpath(book_slug + ".jpg")
 
-    with open(csv_file_path, "w") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=csv_fieldnames)
-        writer.writeheader()
-        for data in csv_rows:
-            writer.writerow(data)
+        with open(image_file, "wb") as out_file:
+            out_file.write(img_response.content)
 
+    def save_csv(self, category_name: str, csv_rows: dict, category_path: Path):
+        csv_fieldnames = [
+            "URL",
+            "UPC",
+            "Title",
+            "Price Including Tax",
+            "Price Excluding Tax",
+            "Number Available",
+            "Product Description",
+            "Category",
+            "Review Rating",
+            "Image URL",
+        ]
 
-def save_category(category: Category, category_name: str, category_path: Path):
+        category_slug = self.slugify(category_name)
+        csv_file_path = category_path.joinpath("{slug}.csv".format(slug=category_slug))
 
-    csv_rows = []
+        if csv_file_path.exists():
+            self.backup_csv_file(csv_file=csv_file_path)
 
-    for book in category.books:
-        book_object = category.books[book]
-        csv_rows.append(
-            {
-                "URL": book_object.url,
-                "UPC": book_object.upc,
-                "Title": book_object.title,
-                "Price Including Tax": book_object.price_including_tax,
-                "Price Excluding Tax": book_object.price_excluding_tax,
-                "Number Available": book_object.number_available,
-                "Product Description": book_object.product_description,
-                "Category": book_object.category,
-                "Review Rating": book_object.review_rating,
-                "Image URL": book_object.image_url,
-            }
+        with open(csv_file_path, "w") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=csv_fieldnames)
+            writer.writeheader()
+            for data in csv_rows:
+                writer.writerow(data)
+
+    def save_category(
+        self, category: Category, category_name: str, category_path: Path
+    ):
+
+        csv_rows = []
+
+        for book in category.books:
+            book_object = category.books[book]
+            csv_rows.append(
+                {
+                    "URL": book_object.url,
+                    "UPC": book_object.upc,
+                    "Title": book_object.title,
+                    "Price Including Tax": book_object.price_including_tax,
+                    "Price Excluding Tax": book_object.price_excluding_tax,
+                    "Number Available": book_object.number_available,
+                    "Product Description": book_object.product_description,
+                    "Category": book_object.category,
+                    "Review Rating": book_object.review_rating,
+                    "Image URL": book_object.image_url,
+                }
+            )
+            self.save_image(
+                book_title=book_object.title,
+                image_url=book_object.image_url,
+                category_path=category_path,
+            )
+
+        self.save_csv(
+            category_name=category_name, csv_rows=csv_rows, category_path=category_path
         )
 
-    save_csv(
-        category_name=category_name, csv_rows=csv_rows, category_path=category_path
-    )
+    def save_library(self, library: Library):
 
+        for category in library.categories:
+            category_object = library.categories[category]
+            category_name = category_object.name
 
-def save_library(library: Library, save_path: str):
+            category_path = self.get_category_path(category_name=category_name)
+            self.create_category_dir(category_path)
 
-    for category in library.categories:
-        category_object = library.categories[category]
-        category_name = category_object.name
-
-        category_path = get_category_path(
-            save_path=save_path, category_name=category_name
-        )
-        create_category_dir(category_path)
-
-        save_category(
-            category=category_object,
-            category_name=category_name,
-            category_path=category_path,
-        )
+            self.save_category(
+                category=category_object,
+                category_name=category_name,
+                category_path=category_path,
+            )

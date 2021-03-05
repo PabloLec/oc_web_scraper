@@ -110,3 +110,14 @@ class CouldNotParseInfo(Exception):
                 info=info, title=title, url=url
             )
         )
+
+
+class FailedToSaveImage(Exception):
+    """Raised when bad response code is returned from Image URL GET request"""
+
+    def __init__(self, title: str, url: str):
+        super().__init__(
+            "Could get image for title: {title}.\nURL: {url}".format(
+                title=title, url=url
+            )
+        )

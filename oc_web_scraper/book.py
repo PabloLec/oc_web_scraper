@@ -37,7 +37,7 @@ class Book:
         # are hard coded to ease eventual adaptation for
         # future website structure modifications.
         self.image_relative_path = "../../"
-        self.image_absolute_path = "https://books.toscrape.com"
+        self.image_absolute_path = "https://books.toscrape.com/"
 
         self.title = title
         self.url = url
