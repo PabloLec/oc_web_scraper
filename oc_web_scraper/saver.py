@@ -1,14 +1,12 @@
 import csv
-import requests
-import yaml
-
-from pathlib import Path
 from string import ascii_letters
+from pathlib import Path
+
+import requests
 
 from oc_web_scraper import errors as _CUSTOM_ERRORS
 from oc_web_scraper.logger import Logger
 from oc_web_scraper.library import Library
-from oc_web_scraper.category import Category
 
 
 class Saver:
@@ -75,8 +73,8 @@ class Saver:
         for category in library.categories:
             category_object = library.categories[category]
             category_name = category_object.name
-
             category_path = self.get_category_path(category_name=category_name)
+
             self.create_category_dir(category_path)
 
             self.save_category(
@@ -104,6 +102,7 @@ class Saver:
 
         for book in category_books:
             book_object = category_books[book]
+
             csv_rows.append(
                 {
                     "URL": book_object.url,
@@ -118,6 +117,7 @@ class Saver:
                     "Image URL": book_object.image_url,
                 }
             )
+
             self.save_image(
                 book_title=book_object.title,
                 image_url=book_object.image_url,
@@ -127,6 +127,7 @@ class Saver:
         self.save_csv(
             category_name=category_name, csv_rows=csv_rows, category_path=category_path
         )
+
         self.logger.write(
             log_level="debug",
             message="Category '{cat}' saved.".format(cat=category_name),
