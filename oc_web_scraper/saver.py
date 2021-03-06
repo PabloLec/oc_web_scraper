@@ -129,7 +129,7 @@ class Saver:
         )
 
         self.logger.write(
-            log_level="debug",
+            log_level="info",
             message="Category '{cat}' saved.".format(cat=category_name),
         )
 

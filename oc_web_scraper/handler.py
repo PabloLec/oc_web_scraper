@@ -156,7 +156,3 @@ class Handler:
             name = cat.get_text().strip()
 
             self.library.create_category(name=name, url=self.website_url + url)
-
-            # Breaking after first cat is scrapped
-            # for dev purposes
-            break

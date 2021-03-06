@@ -6,4 +6,4 @@ from oc_web_scraper.handler import Handler
 
 
 def main():
-    Handler("https://books.toscrape.com/") b
+    Handler("https://books.toscrape.com/")
