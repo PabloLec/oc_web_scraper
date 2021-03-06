@@ -16,7 +16,15 @@ class Handler:
     It parses config from config.yaml, instantiate logger
     and saver objects.
     Then, start scraping main page and populates main
-    Library object."""
+    Library object.
+
+    Attributes:
+        config (dict): App config parsed from config.yaml.
+        logger (Logger): Main app logger object.
+        saver (Saver): Saver object used to store scrapped content locally.
+        website_url (str): Website root url. Passed as instantiation argument.
+        library (Library): Main object used to initiate scrapping events.
+    """
 
     def __init__(self, website_url: str):
         """Constructor for Handler class.
