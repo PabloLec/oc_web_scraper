@@ -24,7 +24,10 @@ The website content will be saved locally to a folder named `data`. CSV files wi
 As the MIT Licence once said, the software is provided 'as is'. Being a study project for a particular website, its usage can hardly be extended.
 
 Although, performances and UX could be enhanced by:
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7a475f77431d06c345be3a4f91bd2cc263433cec
 - Multithreading with creating a pool of either individual GET requests or whole category scrapes.
 - Including date/time for dir and file naming. It would ease periodical scraping.
 - Incremental saving, as the whole process takes several minutes it could be useful to prevent data loss.
