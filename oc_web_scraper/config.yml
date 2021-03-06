@@ -2,4 +2,4 @@ save_path: "/tmp/data/"
 enable_logging: True
 log_to_file: False
 log_path: "/tmp/"
-log_level: "debug"
+log_level: "info"

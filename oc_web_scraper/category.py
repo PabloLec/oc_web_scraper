@@ -82,7 +82,7 @@ class Category:
         return stdout_content
 
     def create_book(self, title: str, url: str):
-        """Instantiate a Book object with previously scrapped infos
+        """Instantiate a Book object with previously scrapped infos.
 
         Args:
             title (str): Book title.
@@ -96,10 +96,38 @@ class Category:
         """Scraping process for default category page.
         Calls scrap_category_page function for proper scraping
         per page.
+        """
+
+        soup = self.create_soup()
+
+        self.find_number_of_books_to_scrap(soup=soup)
+
+        # If number of pages is greater than number displayed per
+        # page, handle multiple pages scraping.
+        if self.number_of_books <= self.number_of_books_per_page:
+            self.scrap_category_page(self.url)
+
+        else:
+            number_of_pages = (
+                self.number_of_books // self.number_of_books_per_page
+            ) + 1
+
+            for page_number in range(1, number_of_pages + 1):
+                page_url = self.url.replace(
+                    "index", "page-{num}".format(num=page_number)
+                )
+
+                self.scrap_category_page(page_url)
+
+    def create_soup(self):
+        """Create a BeautifulSoup object from raw request response.
 
         Raises:
-            _CUSTOM_ERRORS.NoResultFoundForCategory: If no books were found for
-            this category.
+            _CUSTOM_ERRORS.CouldNotGetCategoryPage: If response code is
+            different from 200.
+
+        Returns:
+            BeautifulSoup: Object to work with during further scraping.
         """
 
         raw_response = requests.get(self.url)
@@ -118,8 +146,20 @@ class Category:
 
         soup = BeautifulSoup(raw_response.content, "html.parser")
 
-        # Scrap number of results for this category in order to avoid useless
-        # GET requests later.
+        return soup
+
+    def find_number_of_books_to_scrap(self, soup: BeautifulSoup):
+        """Scrap number of results for this category in order to avoid useless
+        GET requests later.
+
+        Args:
+            soup (BeautifulSoup): BeautifulSoup object of the category page.
+
+        Raises:
+            _CUSTOM_ERRORS.NoResultFoundForCategory: If no books were found for
+            this category.
+        """
+
         nb_of_results = soup.find("form", attrs={"class": "form-horizontal"})
 
         if nb_of_results is None:
@@ -138,18 +178,6 @@ class Category:
                 number=self.number_of_books
             ),
         )
-
-        if self.number_of_books <= self.number_of_books_per_page:
-            self.scrap_category_page(self.url)
-        else:
-            number_of_pages = (
-                self.number_of_books // self.number_of_books_per_page
-            ) + 1
-            for page_number in range(1, number_of_pages + 1):
-                page_url = self.url.replace(
-                    "index", "page-{num}".format(num=page_number)
-                )
-                self.scrap_category_page(page_url)
 
     def scrap_category_page(self, page_url: str):
         """Scraps a category page.

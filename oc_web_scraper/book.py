@@ -90,14 +90,27 @@ class Book:
         """Scraping process for book pages.
         Relevant infos are picked using bs4 and stored in class
         attributes.
+        """
+
+        soup = self.create_soup()
+
+        self.set_image_url(soup=soup)
+
+        self.set_rating(soup=soup)
+
+        self.set_product_description(soup=soup)
+
+        self.set_product_info(soup=soup)
+
+    def create_soup(self):
+        """Create a BeautifulSoup object from raw request response.
 
         Raises:
-            _CUSTOM_ERRORS.NoImageFound: If book cover is not found in page.
-            _CUSTOM_ERRORS.NoRatingFound: If book rating is not found in page.
-            _CUSTOM_ERRORS.NoProductDescriptionFound: If book description is
-            found in page but proper text is not.
-            _CUSTOM_ERRORS.NoProductInformationFound: If book information
-            container is not found in page.
+            _CUSTOM_ERRORS.CouldNotGetBookPage: If response code is
+            different from 200.
+
+        Returns:
+            BeautifulSoup: Object to work with during further scraping.
         """
 
         raw_response = requests.get(self.url)
@@ -116,6 +129,19 @@ class Book:
 
         soup = BeautifulSoup(raw_response.content, "html.parser")
 
+        return soup
+
+    def set_image_url(self, soup: BeautifulSoup):
+        """Find the book cover image in the page and sets the image_url
+        attribute to its absolute path.
+
+        Args:
+            soup (BeautifulSoup): BeautifulSoup object of the book page.
+
+        Raises:
+            _CUSTOM_ERRORS.NoImageFound: If book cover is not found in page.
+        """
+
         raw_image = soup.find("img", attrs={"alt": self.title})
 
         if raw_image is None:
@@ -132,6 +158,17 @@ class Book:
 
         self.image_url = image_absolute_url
 
+    def set_rating(self, soup: BeautifulSoup):
+        """Finds the review rating element in the page then calls
+        convert_rating to convert it to int and set object attribute.
+
+        Args:
+            soup (BeautifulSoup): BeautifulSoup object of the book page.
+
+        Raises:
+            _CUSTOM_ERRORS.NoRatingFound: If book rating is not found in page.
+        """
+
         raw_rating = soup.select('p[class*="star-rating"]')
 
         if len(raw_rating) == 0:
@@ -141,38 +178,9 @@ class Book:
             )
             raise _CUSTOM_ERRORS.NoRatingFound(self.title, url=self.url)
 
-        self.set_rating(raw_rating=raw_rating[0])
+        self.convert_rating(raw_rating=raw_rating[0])
 
-        raw_product_description_title = soup.find(
-            "div", attrs={"id": "product_description"}
-        )
-
-        # Allow empty description, which occurs.
-        if raw_product_description_title is not None:
-            raw_product_description = raw_product_description_title.find_next("p")
-            if raw_product_description is None:
-                self.logger.write(
-                    log_level="error",
-                    message="No product description found on book page.",
-                )
-                raise _CUSTOM_ERRORS.NoProductDescriptionFound(self.title, url=self.url)
-
-            self.product_description = raw_product_description.get_text().strip()
-
-        raw_product_information = soup.find(
-            "table", attrs={"class": "table table-striped"}
-        )
-
-        if raw_product_information is None:
-            self.logger.write(
-                log_level="error",
-                message="No product information found on book page.",
-            )
-            raise _CUSTOM_ERRORS.NoProductInformationFound(self.title, url=self.url)
-
-        self.parse_product_info(raw_product_information)
-
-    def set_rating(self, raw_rating: element.Tag):
+    def convert_rating(self, raw_rating: element.Tag):
         """Converts string literal rating values to int value
         from the raw rating DOM element class attributes.
 
@@ -200,6 +208,59 @@ class Book:
             self.review_rating = 5
         else:
             raise _CUSTOM_ERRORS.FailedToGetRating(class_attributes)
+
+    def set_product_description(self, soup: BeautifulSoup):
+        """Finds the product description, if present, in book page.
+        Then sets object attribute.
+
+        Args:
+            soup (BeautifulSoup): BeautifulSoup object of the book page.
+
+        Raises:
+            _CUSTOM_ERRORS.NoProductDescriptionFound: If book description is
+            found in page but proper text is not.
+        """
+
+        raw_product_description_title = soup.find(
+            "div", attrs={"id": "product_description"}
+        )
+
+        # Allow empty description, which occurs.
+        if raw_product_description_title is not None:
+            raw_product_description = raw_product_description_title.find_next("p")
+            if raw_product_description is None:
+                self.logger.write(
+                    log_level="error",
+                    message="No product description found on book page.",
+                )
+                raise _CUSTOM_ERRORS.NoProductDescriptionFound(self.title, url=self.url)
+
+            self.product_description = raw_product_description.get_text().strip()
+
+    def set_product_info(self, soup: BeautifulSoup):
+        """Finds the product info container element in the page then calls
+        parse_product_info to parse it and set object attributes.
+
+        Args:
+            soup (BeautifulSoup): BeautifulSoup object of the book page.
+
+        Raises:
+            _CUSTOM_ERRORS.NoProductInformationFound: If book information
+            container is not found in page.
+        """
+
+        raw_product_information = soup.find(
+            "table", attrs={"class": "table table-striped"}
+        )
+
+        if raw_product_information is None:
+            self.logger.write(
+                log_level="error",
+                message="No product information found on book page.",
+            )
+            raise _CUSTOM_ERRORS.NoProductInformationFound(self.title, url=self.url)
+
+        self.parse_product_info(raw_product_information)
 
     def parse_product_info(self, raw_info: element.Tag):
         """Parses informations displayed within the information
