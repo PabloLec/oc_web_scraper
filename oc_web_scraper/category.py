@@ -63,7 +63,7 @@ class Category:
 
         self.logger.write(
             log_level="info",
-            message="{scrapped_num}/{website_num} books scrapped for category.".format(
+            message="{scrapped_num}/{website_num} book(s) scrapped for category.".format(
                 scrapped_num=len(self.books),
                 website_num=self.number_of_books,
             ),

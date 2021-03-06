@@ -98,6 +98,13 @@ class Saver:
             category_path (Path): Local save path for this category.
         """
 
+        self.logger.write(
+            log_level="info",
+            message="Saving '{cat}' with {num} book(s).".format(
+                cat=category_name, num=len(category_books)
+            ),
+        )
+
         csv_rows = []
 
         for book in category_books:
