@@ -43,8 +43,11 @@ class Logger:
         self.log_path = log_path
         self.log_level = None
         self.set_log_level(log_level=log_level)
+        self.log_format = logging.Formatter(
+            "%(asctime)s - %(levelname)s - %(message)s", datefmt="%H:%M:%S"
+        )
 
-        self.logger = logging.getLogger("main")
+        self.logger = logging.getLogger(__name__)
         self.logger.setLevel(self.log_level)
 
         if log_to_file:
@@ -62,6 +65,8 @@ class Logger:
             _CUSTOM_ERRORS.CouldNotParseLogLevel: If log level given in
             config.yml does not match any 'logging' library level.
         """
+
+        log_level = log_level.lower()
 
         if log_level == "debug":
             self.log_level = logging.DEBUG
@@ -87,6 +92,7 @@ class Logger:
 
         file_handler = logging.FileHandler(absolute_path)
         file_handler.setLevel(self.log_level)
+        file_handler.setFormatter(self.log_format)
 
         self.logger.addHandler(file_handler)
 
@@ -95,10 +101,11 @@ class Logger:
 
         stream_handler = logging.StreamHandler()
         stream_handler.setLevel(self.log_level)
+        stream_handler.setFormatter(self.log_format)
 
         self.logger.addHandler(stream_handler)
 
-    def write(self, log_level: str, text: str):
+    def write(self, log_level: str, message: str):
         """Writes given message to either a file or terminal.
         Handles returning if logging is disabled.
         Logger object of 'logging' library handles not writing
@@ -106,19 +113,19 @@ class Logger:
 
         Args:
             log_level (str): Message log level.
-            text (str): Message text to print.
+            message (str): Message text to print.
         """
 
         if not self.enable_logging:
             return
 
         if log_level == "debug":
-            self.logger.debug(text)
+            self.logger.debug(message)
         elif log_level == "info":
-            self.logger.info(text)
+            self.logger.info(message)
         elif log_level == "warning":
-            self.logger.warning(text)
+            self.logger.warning(message)
         elif log_level == "error":
-            self.logger.error(text)
+            self.logger.error(message)
         elif log_level == "critical":
-            self.logger.critical(text)
+            self.logger.critical(message)

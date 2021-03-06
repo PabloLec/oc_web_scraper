@@ -1,9 +1,9 @@
 class CouldNotGetMainPage(Exception):
-    """Raised when path provided in config for saving does not exists."""
+    """Raised when status code for main page GET request is different from 200."""
 
     def __init__(self, url):
         super().__init__(
-            "Could not get the main page. Check your website URL.\nURL: {url}".format(
+            "Could not get the main page. Verify your website URL.\nURL: {url}".format(
                 url=url
             )
         )
@@ -14,7 +14,7 @@ class SavePathDoesNotExists(Exception):
 
     def __init__(self, path):
         super().__init__(
-            "Save path does not exists. Check your config file.\nCurrent path: {path}".format(
+            "Save path does not exists. Verify your config file.\nCurrent path: {path}".format(
                 path=path
             )
         )
@@ -45,6 +45,15 @@ class NoCategoryFound(Exception):
         super().__init__("No category found within main page's container.")
 
 
+class CouldNotGetCategoryPage(Exception):
+    """Raised when status code for cat page GET request is different from 200."""
+
+    def __init__(self, url):
+        super().__init__(
+            "Could not get the category page. Verify URL.\nURL: {url}".format(url=url)
+        )
+
+
 class NoResultFoundForCategory(Exception):
     """Raised when no results are found for given category page"""
 
@@ -53,6 +62,15 @@ class NoResultFoundForCategory(Exception):
             "No result were found for this category. Verify the validity of given url: \n{url}".format(
                 url=url
             )
+        )
+
+
+class CouldNotGetBookPage(Exception):
+    """Raised when status code for book page GET request is different from 200."""
+
+    def __init__(self, url):
+        super().__init__(
+            "Could not get the book page. Verify URL.\nURL: {url}".format(url=url)
         )
 
 

@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup, element
 
 from oc_web_scraper import errors as _CUSTOM_ERRORS
+from oc_web_scraper.logger import Logger
 
 
 class Book:
@@ -11,6 +12,7 @@ class Book:
     stores its unique product information.
 
     Attributes:
+        logger (Logger): Main app logger object. Passed in instantiation arguments.
         image_relative_path (str): Relative path hard-coded in image URLs.
         image_absolute_path (str): Absolute equivalent of the relative path.
         title (str): Book title. Passed in instantiation arguments.
@@ -24,14 +26,17 @@ class Book:
         review_rating (str): Review rating, set during infos scraping.
         image_url (str): Book cover image URL, set during infos scraping."""
 
-    def __init__(self, title: str, url: str, category: str):
+    def __init__(self, title: str, url: str, category: str, logger: Logger):
         """Constructor for Book class.
 
         Args:
             title (str): Book title.
             url (str): Book page URL.
             category (str): Category of the book.
+            logger (Logger): Main app logger object.
         """
+
+        self.logger = logger
 
         # Image URL relative part and its absolute equivalent
         # are hard coded to ease eventual adaptation for
@@ -42,6 +47,11 @@ class Book:
         self.title = title
         self.url = url
         self.category = category
+
+        self.logger.write(
+            log_level="info",
+            message="Created book titled {title}.".format(title=self.title),
+        )
 
         self.product_description = None
         self.upc = None
@@ -91,11 +101,28 @@ class Book:
         """
 
         raw_response = requests.get(self.url)
+
+        if raw_response.status_code != 200:
+            self.logger.write(
+                log_level="error",
+                message="Bad status code received from request to website.",
+            )
+            raise _CUSTOM_ERRORS.CouldNotGetBookPage(url=self.url)
+
+        self.logger.write(
+            log_level="debug",
+            message="Received response for book page with status code 200.",
+        )
+
         soup = BeautifulSoup(raw_response.content, "html.parser")
 
         raw_image = soup.find("img", attrs={"alt": self.title})
 
         if raw_image is None:
+            self.logger.write(
+                log_level="error",
+                message="No image found on book page.",
+            )
             raise _CUSTOM_ERRORS.NoImageFound(self.title, url=self.url)
 
         image_relative_url = raw_image["src"]
@@ -108,6 +135,10 @@ class Book:
         raw_rating = soup.select('p[class*="star-rating"]')
 
         if len(raw_rating) == 0:
+            self.logger.write(
+                log_level="error",
+                message="No rating found on book page.",
+            )
             raise _CUSTOM_ERRORS.NoRatingFound(self.title, url=self.url)
 
         self.set_rating(raw_rating=raw_rating[0])
@@ -120,6 +151,10 @@ class Book:
         if raw_product_description_title is not None:
             raw_product_description = raw_product_description_title.find_next("p")
             if raw_product_description is None:
+                self.logger.write(
+                    log_level="error",
+                    message="No product description found on book page.",
+                )
                 raise _CUSTOM_ERRORS.NoProductDescriptionFound(self.title, url=self.url)
 
             self.product_description = raw_product_description.get_text().strip()
@@ -129,6 +164,10 @@ class Book:
         )
 
         if raw_product_information is None:
+            self.logger.write(
+                log_level="error",
+                message="No product information found on book page.",
+            )
             raise _CUSTOM_ERRORS.NoProductInformationFound(self.title, url=self.url)
 
         self.parse_product_info(raw_product_information)
@@ -197,6 +236,10 @@ class Book:
         ]
 
         if any(mandatory_attr_not_set):
+            self.logger.write(
+                log_level="error",
+                message="Book informations parsing failed.",
+            )
             raise _CUSTOM_ERRORS.BookInfoParsingFailed(title=self.title, url=self.url)
 
     def set_upc(self, raw_line: element.Tag):
@@ -213,6 +256,10 @@ class Book:
         value = raw_line.find("td")
 
         if value is None:
+            self.logger.write(
+                log_level="error",
+                message="Could not parse UPC on book page.",
+            )
             raise _CUSTOM_ERRORS.CouldNotParseInfo(
                 title=self.title, info="UPC", url=self.url
             )
@@ -233,6 +280,10 @@ class Book:
         value = raw_line.find("td")
 
         if value is None:
+            self.logger.write(
+                log_level="error",
+                message="Could not parse Price incl. tax on book page.",
+            )
             raise _CUSTOM_ERRORS.CouldNotParseInfo(
                 title=self.title, info="Price including Tax", url=self.url
             )
@@ -253,6 +304,10 @@ class Book:
         value = raw_line.find("td")
 
         if value is None:
+            self.logger.write(
+                log_level="error",
+                message="Could not parse Price excl. tax on book page.",
+            )
             raise _CUSTOM_ERRORS.CouldNotParseInfo(
                 title=self.title, info="Price excluding Tax", url=self.url
             )
@@ -273,6 +328,10 @@ class Book:
         value = raw_line.find("td")
 
         if value is None:
+            self.logger.write(
+                log_level="error",
+                message="Could not parse number of books available on book page.",
+            )
             raise _CUSTOM_ERRORS.CouldNotParseInfo(
                 title=self.title, info="Number available", url=self.url
             )
@@ -280,6 +339,10 @@ class Book:
         number = re.findall("([0-9]+) available", value.get_text())
 
         if len(number) == 0:
+            self.logger.write(
+                log_level="error",
+                message="Could not parse number of books available on book page.",
+            )
             raise _CUSTOM_ERRORS.CouldNotParseInfo(
                 title=self.title, info="Number available", url=self.url
             )

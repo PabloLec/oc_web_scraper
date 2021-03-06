@@ -6,6 +6,7 @@ from pathlib import Path
 from string import ascii_letters
 
 from oc_web_scraper import errors as _CUSTOM_ERRORS
+from oc_web_scraper.logger import Logger
 from oc_web_scraper.library import Library
 from oc_web_scraper.category import Category
 
@@ -17,16 +18,20 @@ class Saver:
     cover image for each book.
 
     Attributes:
+        logger (Logger): Main app logger object. Passed in instantiation arguments.
         save_path (str): Parsed from config.yml file. Set
         by Handler.
     """
 
-    def __init__(self, save_path: str):
+    def __init__(self, save_path: str, logger: Logger):
         """Constructor for Saver class.
 
         Args:
             save_path (str): Local save path.
+            logger (Logger): Main app logger object.
         """
+
+        self.logger = logger
 
         self.save_path = save_path
         self.save_path_exists()
@@ -45,6 +50,10 @@ class Saver:
         path_object = Path(self.save_path)
 
         if not path_object.exists():
+            self.logger.write(
+                log_level="error",
+                message="Save path does not exist.",
+            )
             raise _CUSTOM_ERRORS.SavePathDoesNotExists(self.save_path)
 
         return True
@@ -55,6 +64,13 @@ class Saver:
         Args:
             library (Library): Library object created by Handler.
         """
+
+        self.logger.write(
+            log_level="info",
+            message="Starting saving process at path: '{path}'.".format(
+                path=self.save_path
+            ),
+        )
 
         for category in library.categories:
             category_object = library.categories[category]
@@ -68,6 +84,8 @@ class Saver:
                 category_name=category_name,
                 category_path=category_path,
             )
+
+        self.logger.write(log_level="info", message="All data saved locally.")
 
     def save_category(
         self, category_books: dict, category_name: str, category_path: Path
@@ -108,6 +126,10 @@ class Saver:
 
         self.save_csv(
             category_name=category_name, csv_rows=csv_rows, category_path=category_path
+        )
+        self.logger.write(
+            log_level="debug",
+            message="Category '{cat}' saved.".format(cat=category_name),
         )
 
     def slugify(self, raw_string: str):
@@ -189,6 +211,12 @@ class Saver:
         img_response = requests.get(image_url, stream=True, allow_redirects=True)
 
         if img_response.status_code != 200:
+            self.logger.write(
+                log_level="error",
+                message="Failed to get image for book {title} at URL {url}.".format(
+                    title=book_title, url=image_url
+                ),
+            )
             raise _CUSTOM_ERRORS.FailedToSaveImage(title=book_title, url=image_url)
 
         image_dir = category_path.joinpath("images")

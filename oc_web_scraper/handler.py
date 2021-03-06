@@ -16,16 +16,16 @@ class Handler:
         self.config = None
         self.parse_config()
 
-        self.saver = Saver(save_path=self.config["save_path"])
         self.logger = Logger(
             enable_logging=self.config["enable_logging"],
             log_to_file=self.config["log_to_file"],
             log_path=self.config["log_path"],
             log_level=self.config["log_level"],
         )
+        self.saver = Saver(save_path=self.config["save_path"], logger=self.logger)
 
         self.website_url = website_url
-        self.library = Library()
+        self.library = Library(logger=self.logger)
 
         self.scrap_homepage()
 
@@ -42,18 +42,35 @@ class Handler:
         raw_response = requests.get(self.website_url)
 
         if raw_response.status_code != 200:
+            self.logger.write(
+                log_level="error",
+                message="Bad status code received from request to website.",
+            )
             raise _CUSTOM_ERRORS.CouldNotGetMainPage(url=self.website_url)
+
+        self.logger.write(
+            log_level="debug",
+            message="Received response from website with status code 200.",
+        )
 
         soup = BeautifulSoup(raw_response.content, "html.parser")
 
         category_container = soup.find("div", attrs={"class": "side_categories"})
 
         if category_container is None:
+            self.logger.write(
+                log_level="error",
+                message="Failed to find the category container in main page.",
+            )
             raise _CUSTOM_ERRORS.NoCategoryContainerFound
 
         raw_categories_list = category_container.find_all("li")
 
         if raw_categories_list is None:
+            self.logger.write(
+                log_level="error",
+                message="Failed to find the list of categories in main page.",
+            )
             raise _CUSTOM_ERRORS.NoCategoryFound
 
         for cat in raw_categories_list:

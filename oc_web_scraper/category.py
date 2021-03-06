@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from oc_web_scraper import errors as _CUSTOM_ERRORS
+from oc_web_scraper.logger import Logger
 from oc_web_scraper.book import Book
 
 
@@ -13,6 +14,7 @@ class Category:
     a dict. Also, instantiate Book objects during scraping.
 
     Attributes:
+        logger (Logger): Main app logger object. Passed in instantiation arguments.
         number_of_books_per_page (int): Number of books per page displayed
         by the website.
         book_relative_path (str): Relative path hard-coded in book pages URLs.
@@ -25,13 +27,16 @@ class Category:
         Provided by a string in page source.
     """
 
-    def __init__(self, name: str, url: str):
+    def __init__(self, name: str, url: str, logger: Logger):
         """Constructor for Category class.
 
         Args:
             name (str): Category name.
             url (str): Category page URL.
+            logger (Logger): Main app logger object.
         """
+
+        self.logger = logger
 
         # Number of books per page displayed by the website and book
         # pages URL relative part and its absolute equivalent
@@ -47,7 +52,22 @@ class Category:
         self.books = {}
         self.number_of_books = 0
 
+        self.logger.write(
+            log_level="info",
+            message="Created category named '{name}'. Starting scraping process...".format(
+                name=self.name
+            ),
+        )
+
         self.scrap_category()
+
+        self.logger.write(
+            log_level="info",
+            message="{scrapped_num}/{website_num} books scrapped for category.".format(
+                scrapped_num=len(self.books),
+                website_num=self.number_of_books,
+            ),
+        )
 
     def __str__(self):
         stdout_content = " - Name: {name}\n".format(name=self.name)
@@ -69,7 +89,7 @@ class Category:
             url (str): Book page URL.
         """
 
-        book_object = Book(title=title, url=url, category=self.name)
+        book_object = Book(title=title, url=url, category=self.name, logger=self.logger)
         self.books[title] = book_object
 
     def scrap_category(self):
@@ -83,6 +103,19 @@ class Category:
         """
 
         raw_response = requests.get(self.url)
+
+        if raw_response.status_code != 200:
+            self.logger.write(
+                log_level="error",
+                message="Bad status code received from request to website.",
+            )
+            raise _CUSTOM_ERRORS.CouldNotGetCategoryPage(url=self.url)
+
+        self.logger.write(
+            log_level="debug",
+            message="Received response for category page with status code 200.",
+        )
+
         soup = BeautifulSoup(raw_response.content, "html.parser")
 
         # Scrap number of results for this category in order to avoid useless
@@ -90,11 +123,21 @@ class Category:
         nb_of_results = soup.find("form", attrs={"class": "form-horizontal"})
 
         if nb_of_results is None:
+            self.logger.write(
+                log_level="error",
+                message="No book result found on category page.",
+            )
             raise _CUSTOM_ERRORS.NoResultFoundForCategory(self.url)
 
         results_text = nb_of_results.get_text()
 
         self.number_of_books = int(re.findall("([0-9]+) result", results_text)[0])
+        self.logger.write(
+            log_level="debug",
+            message="{number} book(s) to scrap for this category.".format(
+                number=self.number_of_books
+            ),
+        )
 
         if self.number_of_books <= self.number_of_books_per_page:
             self.scrap_category_page(self.url)
