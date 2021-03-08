@@ -1,6 +1,6 @@
 save_path: "/tmp/data/"
 enable_logging: True
-log_to_file: False
+log_to_file: True
 log_path: "/tmp/"
 log_level: "info"
 # Supported log levels:

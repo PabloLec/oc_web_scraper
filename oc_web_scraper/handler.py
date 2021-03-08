@@ -4,6 +4,8 @@ import yaml
 from pathlib import Path
 from bs4 import BeautifulSoup, element
 
+from tqdm import tqdm
+
 from oc_web_scraper import errors as _CUSTOM_ERRORS
 
 from oc_web_scraper.saver import Saver
@@ -35,7 +37,6 @@ class Handler:
 
         self.config = None
         self.parse_config()
-
         self.logger = Logger(
             enable_logging=self.config["enable_logging"],
             log_to_file=self.config["log_to_file"],
@@ -128,6 +129,8 @@ class Handler:
             raise _CUSTOM_ERRORS.NoCategoryContainerFound
 
         raw_category_list = category_container.find_all("li")
+        # Remove first <li> tag as it is index shortcut.
+        del raw_category_list[0]
 
         if raw_category_list is None:
             self.logger.write(
@@ -146,12 +149,9 @@ class Handler:
             raw_category_list (element.ResultSet): Results previously scrapped.
         """
 
-        for cat in raw_category_list:
+        # Disable progress bar if logging outputs to terminal
+        for cat in tqdm(raw_category_list, disable=not (self.config["log_to_file"])):
             url = cat.find("a")["href"]
-
-            # Ignore main <li> tag
-            if "books_1" in url:
-                continue
 
             name = cat.get_text().strip()
 

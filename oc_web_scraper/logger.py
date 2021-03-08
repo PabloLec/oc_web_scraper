@@ -119,6 +119,10 @@ class Logger:
         if not self.enable_logging:
             return
 
+        # Inform user when saving process starts if logging only outputs to file
+        if "Starting saving process" in "message" and self.log_to_file:
+            print("Saving...")
+
         if log_level == "debug":
             self.logger.debug(message)
         elif log_level == "info":

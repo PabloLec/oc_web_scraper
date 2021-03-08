@@ -95,11 +95,8 @@ class Book:
         soup = self.create_soup()
 
         self.set_image_url(soup=soup)
-
         self.set_rating(soup=soup)
-
         self.set_product_description(soup=soup)
-
         self.set_product_info(soup=soup)
 
     def create_soup(self):
