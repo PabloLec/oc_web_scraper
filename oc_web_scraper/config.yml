@@ -1,4 +1,4 @@
-save_path: "/tmp/data/"
+save_path: "/tmp/"
 enable_logging: True
 log_to_file: True
 log_path: "/tmp/"

@@ -4,6 +4,8 @@ from pathlib import Path
 
 import requests
 
+from tqdm import tqdm
+
 from oc_web_scraper import errors as _CUSTOM_ERRORS
 from oc_web_scraper.logger import Logger
 from oc_web_scraper.library import Library
@@ -34,6 +36,8 @@ class Saver:
         self.save_path = save_path
         self.save_path_exists()
 
+        self.create_data_dir()
+
     def save_path_exists(self):
         """Verifies if path input in config.yml exists
 
@@ -56,6 +60,15 @@ class Saver:
 
         return True
 
+    def create_data_dir(self):
+        """Creates a data directory to save all the files in."""
+
+        data_path = Path(self.save_path).joinpath("data")
+
+        Path(data_path).mkdir(exist_ok=True)
+
+        self.save_path = data_path
+
     def save_library(self, library: Library):
         """Drives the saving process by iterating through Library categories.
 
@@ -70,7 +83,11 @@ class Saver:
             ),
         )
 
-        for category in library.categories:
+        # Inform the user if logging outputs to file
+        if self.logger.log_to_file:
+            print(" - Saving...")
+        # Disable progress bar if logging outputs to terminal
+        for category in tqdm(library.categories, disable=not (self.logger.log_to_file)):
             category_object = library.categories[category]
             category_name = category_object.name
             category_path = self.get_category_path(category_name=category_name)

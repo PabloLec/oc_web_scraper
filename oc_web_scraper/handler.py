@@ -149,8 +149,11 @@ class Handler:
             raw_category_list (element.ResultSet): Results previously scrapped.
         """
 
+        # Inform the user if logging outputs to file
+        if self.logger.log_to_file:
+            print(" - Scraping...")
         # Disable progress bar if logging outputs to terminal
-        for cat in tqdm(raw_category_list, disable=not (self.config["log_to_file"])):
+        for cat in tqdm(raw_category_list, disable=not (self.logger.log_to_file)):
             url = cat.find("a")["href"]
 
             name = cat.get_text().strip()
