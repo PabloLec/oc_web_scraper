@@ -1,4 +1,4 @@
-# oc_web_scraper [![GitHub](https://img.shields.io/github/license/pablolec/oc_web_scraper)](https://github.com/PabloLec/oc_web_scraper/blob/main/LICENCE) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+# oc_web_scraper ![GitHub release (latest by date)](https://img.shields.io/github/v/release/pablolec/oc_web_scraper) [![GitHub](https://img.shields.io/github/license/pablolec/oc_web_scraper)](https://github.com/PabloLec/oc_web_scraper/blob/main/LICENCE) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 :books: Made for an [OpenClassrooms](https://openclassrooms.com) studies project.
 
