@@ -39,7 +39,7 @@ python3 -m oc_web_scraper
 #### :framed_picture: Windows 
 
 ```powershell
-py oc_web_scraper
+py -m oc_web_scraper
 ```
 
 _:floppy_disk: The website content will be saved into a folder named `data`. Subfolders will be created per category with corresponding books infos inside a csv file and book cover images stored under `data/CATEGORY_NAME/images/`._
